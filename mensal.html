@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatório Mensal{% endblock %}
+
+{% block header %}Relatório Mensal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chart-container {
+        height: 300px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title">Estatísticas Mensais</h5>
+            <form method="POST" action="{{ url_for('relatorios.mensal') }}" class="d-flex">
+                <select class="form-select me-2" name="mes">
+                    {% for mes in meses %}
+                        <option value="{{ mes.numero }}" {% if mes.numero == mes_selecionado %}selected{% endif %}>{{ mes.nome }}</option>
+                    {% endfor %}
+                </select>
+                <select class="form-select me-2" name="ano">
+                    {% for ano in anos %}
+                        <option value="{{ ano }}" {% if ano == ano_selecionado %}selected{% endif %}>{{ ano }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+            </form>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Total de Receitas</h6>
+                        <p class="display-4">{{ dados.total_receitas }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Aprovadas</h6>
+                        <p class="display-4">{{ dados.aprovadas }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-danger text-white">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Rejeitadas</h6>
+                        <p class="display-4">{{ dados.rejeitadas }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Distribuição por Tipo de Receituário</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="chartTipoReceituario"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Medicamentos Mais Dispensados</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="chartMedicamentos"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">Receitas por Dia do Mês</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="chartDiario"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="d-flex justify-content-between">
+            <a href="{{ url_for('relatorios.index') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+            <button class="btn btn-primary" onclick="window.print()">
+                <i class="bi bi-printer"></i> Imprimir Relatório
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-info text-white">
+        <i class="bi bi-info-circle"></i> Informações Legais
+    </div>
+    <div class="card-body">
+        <p>Este relatório mensal contém estatísticas consolidadas de todas as receitas cadastradas e validadas no período selecionado, em conformidade com:</p>
+        <ul>
+            <li>Portaria SVS/MS nº 344/98 - Regulamento Técnico sobre substâncias e medicamentos sujeitos a controle especial</li>
+            <li>RDC nº 471/2021 - Critérios para prescrição, dispensação e controle de antimicrobianos</li>
+            <li>Normas específicas da Vigilância Sanitária do Estado do Rio de Janeiro</li>
+        </ul>
+        <p class="mb-0 text-muted">Mantenha este relatório arquivado para fins de fiscalização e auditoria.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Dados para os gráficos
+        const tipoReceituarioData = {
+            labels: ['Notificação A', 'Notificação B', 'Controle Especial'],
+            datasets: [{
+                label: 'Quantidade de Receitas',
+                data: [{{ dados.por_tipo['Notificação de Receita A'] }}, 
+                       {{ dados.por_tipo['Notificação de Receita B'] }}, 
+                       {{ dados.por_tipo['Receita de Controle Especial'] }}],
+                backgroundColor: ['#ffc107', '#0d6efd', '#6c757d'],
+                borderWidth: 1
+            }]
+        };
+        
+        const medicamentosLabels = [{% for med in dados.por_medicamento %}'{{ med.nome }}',{% endfor %}];
+        const medicamentosData = [{% for med in dados.por_medicamento %}{{ med.quantidade }},{% endfor %}];
+        
+        const diasLabels = Array.from({length: 30}, (_, i) => i + 1);
+        
+        // Gráfico de Tipo de Receituário
+        new Chart(document.getElementById('chartTipoReceituario'), {
+            type: 'pie',
+            data: tipoReceituarioData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                }
+            }
+        });
+        
+        // Gráfico de Medicamentos
+        new Chart(document.getElementById('chartMedicamentos'), {
+            type: 'bar',
+            data: {
+                labels: medicamentosLabels,
+                datasets: [{
+                    label: 'Quantidade de Receitas',
+                    data: medicamentosData,
+                    backgroundColor: '#20c997',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Gráfico Diário
+        new Chart(document.getElementById('chartDiario'), {
+            type: 'line',
+            data: {
+                labels: diasLabels,
+                datasets: [{
+                    label: 'Receitas por Dia',
+                    data: {{ dados.por_dia }},
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

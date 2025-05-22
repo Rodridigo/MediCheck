@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+
+{% block title %}Cadastrar Receita{% endblock %}
+
+{% block header %}Cadastrar Nova Receita{% endblock %}
+
+{% block extra_css %}
+<style>
+    .receita-form {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        padding: 20px;
+    }
+    .medicamento-item {
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    .receita-preview {
+        border: 1px dashed #dee2e6;
+        padding: 15px;
+        border-radius: 5px;
+        background-color: #fff;
+    }
+    .receita-amarela {
+        background-color: #fff3cd;
+        border: 2px solid #ffc107;
+    }
+    .receita-azul {
+        background-color: #cfe2ff;
+        border: 2px solid #0d6efd;
+    }
+    .receita-branca {
+        background-color: #ffffff;
+        border: 2px solid #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('receitas.cadastrar') }}" class="receita-form">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Informações da Receita</h5>
+                    <div class="mb-3">
+                        <label for="tipo_receita" class="form-label">Tipo de Receita</label>
+                        <select class="form-select" id="tipo_receita" name="tipo_receita" required>
+                            <option value="">Selecione o tipo de receita</option>
+                            <option value="Notificação de Receita A">Notificação de Receita A (Amarela)</option>
+                            <option value="Notificação de Receita B">Notificação de Receita B (Azul)</option>
+                            <option value="Receita de Controle Especial">Receita de Controle Especial (Branca)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="numero_notificacao" class="form-label">Número da Notificação</label>
+                        <input type="text" class="form-control" id="numero_notificacao" name="numero_notificacao" placeholder="Quando aplicável">
+                    </div>
+                    <div class="mb-3">
+                        <label for="data_emissao" class="form-label">Data de Emissão</label>
+                        <input type="date" class="form-control" id="data_emissao" name="data_emissao" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="data_dispensacao" class="form-label">Data de Dispensação</label>
+                        <input type="date" class="form-control" id="data_dispensacao" name="data_dispensacao" value="{{ today }}" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5>Informações do Prescritor</h5>
+                    <div class="mb-3">
+                        <label for="prescritor_nome" class="form-label">Nome do Prescritor</label>
+                        <input type="text" class="form-control" id="prescritor_nome" name="prescritor_nome" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="prescritor_registro" class="form-label">Número de Registro</label>
+                                <input type="text" class="form-control" id="prescritor_registro" name="prescritor_registro" placeholder="CRM/CRO" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="prescritor_uf" class="form-label">UF</label>
+                                <select class="form-select" id="prescritor_uf" name="prescritor_uf" required>
+                                    <option value="RJ" selected>RJ</option>
+                                    <option value="SP">SP</option>
+                                    <option value="MG">MG</option>
+                                    <option value="ES">ES</option>
+                                    <!-- Outros estados -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <h5 class="mt-3">Informações do Paciente</h5>
+                    <div class="mb-3">
+                        <label for="paciente_nome" class="form-label">Nome do Paciente</label>
+                        <input type="text" class="form-control" id="paciente_nome" name="paciente_nome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="paciente_endereco" class="form-label">Endereço do Paciente</label>
+                        <input type="text" class="form-control" id="paciente_endereco" name="paciente_endereco" required>
+                    </div>
+                </div>
+            </div>
+            
+            <h5 class="border-top pt-3">Medicamentos</h5>
+            <div class="alert alert-info mb-3" id="limite-medicamentos-info">
+                <i class="bi bi-info-circle"></i> 
+                <span id="limite-texto">Selecione o tipo de receita para ver o limite de medicamentos permitido.</span>
+            </div>
+            
+            <div id="medicamentos-container">
+                <div class="medicamento-item">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="medicamento" class="form-label">Medicamento</label>
+                                <input type="text" class="form-control" id="medicamento" name="medicamento" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="principio_ativo" class="form-label">Princípio Ativo</label>
+                                <input type="text" class="form-control" id="principio_ativo" name="principio_ativo" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="concentracao" class="form-label">Concentração</label>
+                                <input type="text" class="form-control" id="concentracao" name="concentracao" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="posologia" class="form-label">Posologia</label>
+                                <input type="text" class="form-control" id="posologia" name="posologia" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="quantidade" class="form-label">Quantidade</label>
+                                <input type="text" class="form-control" id="quantidade" name="quantidade" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="duracao_tratamento" class="form-label">Duração do Tratamento</label>
+                                <input type="text" class="form-control" id="duracao_tratamento" name="duracao_tratamento" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <button type="button" id="add-medicamento" class="btn btn-secondary">
+                    <i class="bi bi-plus-circle"></i> Adicionar Medicamento
+                </button>
+                <div>
+                    <a href="{{ url_for('receitas.listar') }}" class="btn btn-outline-secondary me-2">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Salvar Receita
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-info text-white">
+        <i class="bi bi-info-circle"></i> Validações Automáticas
+    </div>
+    <div class="card-body">
+        <p>O sistema realizará as seguintes validações automáticas:</p>
+        <ul>
+            <li><strong>Validade da Receita:</strong> Verificação do prazo de validade conforme o tipo de receita.</li>
+            <li><strong>Quantidade Máxima:</strong> Verificação se a quantidade prescrita está dentro dos limites legais.</li>
+            <li><strong>Dose Máxima Diária:</strong> Alerta se a posologia exceder a dose máxima recomendada.</li>
+            <li><strong>Campos Obrigatórios:</strong> Verificação do preenchimento de todos os campos necessários.</li>
+        </ul>
+        <p class="mb-0 text-muted">Estas validações estão em conformidade com a Portaria 344/98 e RDC 471/2021.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Definir data atual como padrão
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('data_dispensacao').value = today;
+        
+        // Configuração dos limites de medicamentos por tipo de receita
+        const LIMITES_MEDICAMENTOS = {
+            'Notificação de Receita A': 1,
+            'Notificação de Receita B': 1,
+            'Receita de Controle Especial': 3
+        };
+        
+        // Elementos do DOM
+        const tipoReceitaSelect = document.getElementById('tipo_receita');
+        const addMedicamentoBtn = document.getElementById('add-medicamento');
+        const medicamentosContainer = document.getElementById('medicamentos-container');
+        const limiteTexto = document.getElementById('limite-texto');
+        const limiteInfo = document.getElementById('limite-medicamentos-info');
+        
+        // Atualizar informações de limite ao selecionar tipo de receita
+        tipoReceitaSelect.addEventListener('change', function() {
+            const tipoReceita = this.value;
+            const limite = LIMITES_MEDICAMENTOS[tipoReceita] || 0;
+            
+            if (limite > 0) {
+                limiteTexto.textContent = `Este tipo de receita permite no máximo ${limite} medicamento(s).`;
+                limiteInfo.className = 'alert alert-info mb-3';
+                
+                // Verificar se já excedeu o limite
+                verificarLimite(tipoReceita);
+            } else {
+                limiteTexto.textContent = 'Selecione o tipo de receita para ver o limite de medicamentos permitido.';
+                limiteInfo.className = 'alert alert-info mb-3';
+            }
+        });
+        
+        // Verificar limite de medicamentos e atualizar UI
+        function verificarLimite(tipoReceita) {
+            const limite = LIMITES_MEDICAMENTOS[tipoReceita] || 0;
+            const numMedicamentos = medicamentosContainer.children.length;
+            
+            if (numMedicamentos >= limite) {
+                addMedicamentoBtn.disabled = true;
+                limiteInfo.className = 'alert alert-warning mb-3';
+                limiteTexto.textContent = `Limite máximo de ${limite} medicamento(s) atingido para ${tipoReceita}.`;
+            } else {
+                addMedicamentoBtn.disabled = false;
+            }
+        }
+        
+        // Adicionar novo medicamento
+        addMedicamentoBtn.addEventListener('click', function() {
+            const tipoReceita = tipoReceitaSelect.value;
+            const limite = LIMITES_MEDICAMENTOS[tipoReceita] || 0;
+            
+            if (limite > 0 && medicamentosContainer.children.length >= limite) {
+                alert(`Não é possível adicionar mais medicamentos. O limite para ${tipoReceita} é de ${limite} medicamento(s).`);
+                return;
+            }
+            
+            const newItem = document.querySelector('.medicamento-item').cloneNode(true);
+            
+            // Limpar os campos do novo item
+            const inputs = newItem.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.value = '';
+                // Atualizar os IDs e names para evitar duplicação
+                const originalId = input.id;
+                const newId = originalId + '_' + (medicamentosContainer.children.length + 1);
+                input.id = newId;
+                input.name = newId;
+                
+                // Atualizar os labels correspondentes
+                const label = newItem.querySelector(`label[for="${originalId}"]`);
+                if (label) {
+                    label.setAttribute('for', newId);
+                }
+            });
+            
+            medicamentosContainer.appendChild(newItem);
+            
+            // Verificar se atingiu o limite após adicionar
+            verificarLimite(tipoReceita);
+        });
+        
+        // Validação da data de emissão e quantidade de medicamentos
+        document.querySelector('form').addEventListener('submit', function(event) {
+            const tipoReceita = tipoReceitaSelect.value;
+            const dataEmissao = new Date(document.getElementById('data_emissao').value);
+            const hoje = new Date();
+            const diffTime = Math.abs(hoje - dataEmissao);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            let validadeMaxima = 30; // Padrão para a maioria dos receituários
+            
+            if (tipoReceita === 'Receita de Controle Especial' && 
+                document.getElementById('medicamento').value.toLowerCase().includes('antimicrobiano')) {
+                validadeMaxima = 10; // RDC 471/2021 para antimicrobianos
+            }
+            
+            if (diffDays > validadeMaxima) {
+                alert(`Atenção: A receita está com data de emissão superior a ${validadeMaxima} dias, o que excede o prazo de validade legal.`);
+                event.preventDefault();
+                return false;
+            }
+            
+            // Verificar limite de medicamentos
+            const limite = LIMITES_MEDICAMENTOS[tipoReceita] || 0;
+            const numMedicamentos = medicamentosContainer.children.length;
+            
+            if (limite > 0 && numMedicamentos > limite) {
+                alert(`Atenção: Esta receita excede o limite de ${limite} medicamento(s) permitido para ${tipoReceita}.`);
+                event.preventDefault();
+                return false;
+            }
+        });
+    });
+</script>
+{% endblock %}

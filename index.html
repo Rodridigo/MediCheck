@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatórios - Medicheck{% endblock %}
+
+{% block header %}Relatórios e Histórico{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header" style="background-color: var(--medicheck-light);">
+                <h5 class="card-title mb-0" style="color: var(--medicheck-primary);">
+                    <i class="bi bi-calendar-day me-2"></i>Relatório Diário
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <i class="bi bi-calendar-day display-1" style="color: var(--medicheck-primary); margin-bottom: 1rem;"></i>
+                <p class="card-text">Visualize todas as receitas cadastradas e validadas no dia, com resumo de atividades.</p>
+                <a href="{{ url_for('relatorios.diario') }}" class="btn btn-primary">
+                    <i class="bi bi-eye"></i> Visualizar
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header" style="background-color: var(--medicheck-light);">
+                <h5 class="card-title mb-0" style="color: var(--medicheck-primary);">
+                    <i class="bi bi-calendar-month me-2"></i>Relatório Mensal
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <i class="bi bi-calendar-month display-1" style="color: var(--medicheck-primary); margin-bottom: 1rem;"></i>
+                <p class="card-text">Análise mensal de receitas, com gráficos e estatísticas de dispensação.</p>
+                <a href="{{ url_for('relatorios.mensal') }}" class="btn btn-primary">
+                    <i class="bi bi-eye"></i> Visualizar
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header" style="background-color: var(--medicheck-light);">
+                <h5 class="card-title mb-0" style="color: var(--medicheck-primary);">
+                    <i class="bi bi-capsule me-2"></i>Relatório de Medicamentos
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <i class="bi bi-capsule display-1" style="color: var(--medicheck-primary); margin-bottom: 1rem;"></i>
+                <p class="card-text">Estatísticas de dispensação por medicamento e lista da Portaria 344/98.</p>
+                <a href="{{ url_for('relatorios.medicamentos') }}" class="btn btn-primary">
+                    <i class="bi bi-eye"></i> Visualizar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3 shadow-sm">
+    <div class="card-header" style="background-color: var(--medicheck-light);">
+        <h5 class="card-title mb-0" style="color: var(--medicheck-primary);">
+            <i class="bi bi-info-circle me-2"></i>Informações sobre Relatórios
+        </h5>
+    </div>
+    <div class="card-body">
+        <p>Os relatórios do Medicheck são gerados com base nos registros de receitas cadastradas e validadas, oferecendo diferentes visões para análise e controle:</p>
+        
+        <ul>
+            <li><strong>Relatório Diário:</strong> Mostra todas as receitas do dia, com status de aprovação/rejeição e detalhes de cada dispensação.</li>
+            <li><strong>Relatório Mensal:</strong> Apresenta estatísticas consolidadas do mês, com gráficos de tendências e distribuição por tipo de receituário.</li>
+            <li><strong>Relatório de Medicamentos:</strong> Exibe os medicamentos mais dispensados, agrupados por lista da Portaria 344/98 e RDC 471/2021.</li>
+        </ul>
+        
+        <div class="alert alert-info">
+            <i class="bi bi-exclamation-circle"></i> Todos os relatórios podem ser impressos ou exportados para análise posterior e envio à Vigilância Sanitária.
+        </div>
+        
+        <p class="mb-0 text-muted">Em conformidade com a Portaria 344/98 e RDC 471/2021, estes relatórios devem ser mantidos arquivados pelo período mínimo de 2 anos.</p>
+    </div>
+</div>
+
+<div class="card mt-4 shadow-sm">
+    <div class="card-header" style="background-color: var(--medicheck-light);">
+        <h5 class="card-title mb-0" style="color: var(--medicheck-primary);">
+            <i class="bi bi-clock-history me-2"></i>Histórico de Atividades Recentes
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Data/Hora</th>
+                        <th>Atividade</th>
+                        <th>Usuário</th>
+                        <th>Detalhes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>19/05/2025 12:15</td>
+                        <td>Cadastro de Receita</td>
+                        <td>Rodrigo</td>
+                        <td>Receita #1 - Rivotril 2mg</td>
+                    </tr>
+                    <tr>
+                        <td>19/05/2025 10:30</td>
+                        <td>Validação de Receita</td>
+                        <td>Rodrigo</td>
+                        <td>Receita #2 - Amoxil 500mg</td>
+                    </tr>
+                    <tr>
+                        <td>19/05/2025 09:45</td>
+                        <td>Login no Sistema</td>
+                        <td>Rodrigo</td>
+                        <td>Acesso via navegador Chrome</td>
+                    </tr>
+                    <tr>
+                        <td>18/05/2025 17:30</td>
+                        <td>Rejeição de Receita</td>
+                        <td>Rodrigo</td>
+                        <td>Receita #3 - Ritalina 10mg (Validade expirada)</td>
+                    </tr>
+                    <tr>
+                        <td>18/05/2025 16:20</td>
+                        <td>Consulta de Medicamento</td>
+                        <td>Rodrigo</td>
+                        <td>Busca por "Clonazepam"</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-end mt-3">
+            <a href="#" class="btn btn-outline-primary">
+                <i class="bi bi-download"></i> Exportar Histórico Completo
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Consultar Medicamentos{% endblock %}
+
+{% block header %}Consultar Medicamentos{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Busca de Medicamentos</h5>
+        <p class="card-text">Pesquise medicamentos controlados e antimicrobianos para verificar requisitos de prescrição.</p>
+        
+        <form method="POST" action="{{ url_for('medicamentos.consultar') }}" class="mb-4">
+            <div class="input-group">
+                <input type="text" class="form-control" name="termo_busca" placeholder="Digite o nome comercial ou princípio ativo" value="{{ termo_busca }}">
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+            </div>
+        </form>
+        
+        {% if resultados %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nome Comercial</th>
+                            <th>Princípio Ativo</th>
+                            <th>Concentração</th>
+                            <th>Tipo de Receituário</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for medicamento in resultados %}
+                            <tr>
+                                <td>{{ medicamento.nome_comercial }}</td>
+                                <td>{{ medicamento.principio_ativo }}</td>
+                                <td>{{ medicamento.concentracao }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if medicamento.cor_receituario == 'Azul' %}bg-primary
+                                        {% elif medicamento.cor_receituario == 'Amarela' %}bg-warning text-dark
+                                        {% else %}bg-light text-dark border
+                                        {% endif %}">
+                                        {{ medicamento.tipo_receituario }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('medicamentos.detalhes', medicamento_id=medicamento.id) }}" class="btn btn-sm btn-info">
+                                        <i class="bi bi-info-circle"></i> Detalhes
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% elif termo_busca %}
+            <div class="alert alert-info">
+                Nenhum medicamento encontrado com o termo "{{ termo_busca }}".
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-info text-white">
+        <i class="bi bi-info-circle"></i> Informações sobre Receituários
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header bg-warning text-dark">Notificação de Receita A</div>
+                    <div class="card-body">
+                        <p><strong>Cor:</strong> Amarela</p>
+                        <p><strong>Validade:</strong> 30 dias</p>
+                        <p><strong>Medicamentos:</strong> Entorpecentes (Lista A)</p>
+                        <p><strong>Quantidade:</strong> Até 30 dias de tratamento</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">Notificação de Receita B</div>
+                    <div class="card-body">
+                        <p><strong>Cor:</strong> Azul</p>
+                        <p><strong>Validade:</strong> 30 dias</p>
+                        <p><strong>Medicamentos:</strong> Psicotrópicos (Lista B)</p>
+                        <p><strong>Quantidade:</strong> Até 60 dias de tratamento</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header bg-light">Receita de Controle Especial</div>
+                    <div class="card-body">
+                        <p><strong>Cor:</strong> Branca (2 vias)</p>
+                        <p><strong>Validade:</strong> 30 dias (controlados) / 10 dias (antimicrobianos)</p>
+                        <p><strong>Medicamentos:</strong> Lista C e Antimicrobianos</p>
+                        <p><strong>Quantidade:</strong> Até 60 dias (controlados) / 90 dias (antimicrobianos)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

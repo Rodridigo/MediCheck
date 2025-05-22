@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Validar Receita{% endblock %}
+
+{% block header %}Validar Receita{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header 
+        {% if receita.tipo_receita == 'Notificação de Receita A' %}bg-warning text-dark
+        {% elif receita.tipo_receita == 'Notificação de Receita B' %}bg-primary text-white
+        {% else %}bg-light
+        {% endif %}">
+        <h5 class="mb-0">{{ receita.tipo_receita }} {% if receita.numero_notificacao %}#{{ receita.numero_notificacao }}{% endif %}</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6 class="border-bottom pb-2 mb-3">Informações da Receita</h6>
+                <p><strong>Data de Emissão:</strong> {{ receita.data_emissao }}</p>
+                <p><strong>Data de Dispensação:</strong> {{ receita.data_dispensacao }}</p>
+                
+                <h6 class="border-bottom pb-2 mb-3 mt-4">Informações do Prescritor</h6>
+                <p><strong>Nome:</strong> {{ receita.prescritor_nome }}</p>
+                <p><strong>Registro:</strong> {{ receita.prescritor_registro }}</p>
+                <p><strong>UF:</strong> {{ receita.prescritor_uf }}</p>
+            </div>
+            <div class="col-md-6">
+                <h6 class="border-bottom pb-2 mb-3">Informações do Paciente</h6>
+                <p><strong>Nome:</strong> {{ receita.paciente_nome }}</p>
+                <p><strong>Endereço:</strong> {{ receita.paciente_endereco }}</p>
+            </div>
+        </div>
+        
+        <h6 class="border-bottom pb-2 mb-3 mt-4">Medicamentos Prescritos</h6>
+        {% for medicamento in receita.medicamentos %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Nome:</strong> {{ medicamento.nome }}</p>
+                        <p><strong>Princípio Ativo:</strong> {{ medicamento.principio_ativo }}</p>
+                        <p><strong>Concentração:</strong> {{ medicamento.concentracao }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Posologia:</strong> {{ medicamento.posologia }}</p>
+                        <p><strong>Quantidade:</strong> {{ medicamento.quantidade }}</p>
+                        <p><strong>Duração do Tratamento:</strong> {{ medicamento.duracao_tratamento }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div class="alert alert-info mt-4">
+            <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Validação Automática</h6>
+            <div id="validacao-automatica">
+                <div class="mb-2">
+                    <i class="bi bi-check-circle text-success"></i> Todos os campos obrigatórios estão preenchidos.
+                </div>
+                
+                {% if receita.tipo_receita == 'Notificação de Receita A' %}
+                <div class="mb-2">
+                    <i class="bi bi-check-circle text-success"></i> Receita dentro do prazo de validade (30 dias).
+                </div>
+                <div class="mb-2">
+                    <i class="bi bi-check-circle text-success"></i> Quantidade dentro do limite permitido (30 dias de tratamento).
+                </div>
+                {% elif receita.tipo_receita == 'Notificação de Receita B' %}
+                <div class="mb-2">
+                    <i class="bi bi-check-circle text-success"></i> Receita dentro do prazo de validade (30 dias).
+                </div>
+                <div class="mb-2">
+                    <i class="bi bi-check-circle text-success"></i> Quantidade dentro do limite permitido (60 dias de tratamento).
+                </div>
+                {% else %}
+                <div class="mb-2">
+                    <i class="bi bi-check-circle text-success"></i> Receita dentro do prazo de validade (30 dias para controlados / 10 dias para antimicrobianos).
+                </div>
+                <div class="mb-2">
+                    <i class="bi bi-check-circle text-success"></i> Quantidade dentro do limite permitido (60 dias para controlados / 90 dias para antimicrobianos).
+                </div>
+                {% endif %}
+                
+                <div class="mb-2">
+                    <i class="bi bi-check-circle text-success"></i> Dose diária dentro dos limites recomendados.
+                </div>
+            </div>
+        </div>
+        
+        <form method="POST" action="{{ url_for('receitas.validar', receita_id=receita.id) }}" class="mt-4">
+            <div class="mb-3">
+                <label for="status" class="form-label">Status da Receita</label>
+                <select class="form-select" id="status" name="status" required>
+                    <option value="aprovada">Aprovada</option>
+                    <option value="rejeitada">Rejeitada</option>
+                </select>
+            </div>
+            
+            <div id="rejeicao-container" class="mb-3" style="display: none;">
+                <label for="motivo_rejeicao" class="form-label">Motivo da Rejeição</label>
+                <select class="form-select" id="motivo_rejeicao" name="motivo_rejeicao">
+                    <option value="">Selecione um motivo</option>
+                    <option value="Receita com data de emissão superior ao prazo de validade.">Receita com data de emissão superior ao prazo de validade</option>
+                    <option value="Quantidade prescrita excede o limite máximo permitido.">Quantidade prescrita excede o limite máximo permitido</option>
+                    <option value="Dose diária excede a dose máxima recomendada.">Dose diária excede a dose máxima recomendada</option>
+                    <option value="Receituário inadequado para o medicamento prescrito.">Receituário inadequado para o medicamento prescrito</option>
+                    <option value="Informações incompletas ou ilegíveis.">Informações incompletas ou ilegíveis</option>
+                    <option value="outro">Outro motivo (especificar)</option>
+                </select>
+            </div>
+            
+            <div id="outro-motivo-container" class="mb-3" style="display: none;">
+                <label for="outro_motivo" class="form-label">Especifique o Motivo</label>
+                <textarea class="form-control" id="outro_motivo" name="outro_motivo" rows="3"></textarea>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('receitas.detalhes', receita_id=receita.id) }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Salvar Validação
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusSelect = document.getElementById('status');
+        const rejeicaoContainer = document.getElementById('rejeicao-container');
+        const motivoRejeicaoSelect = document.getElementById('motivo_rejeicao');
+        const outroMotivoContainer = document.getElementById('outro-motivo-container');
+        
+        statusSelect.addEventListener('change', function() {
+            if (this.value === 'rejeitada') {
+                rejeicaoContainer.style.display = 'block';
+            } else {
+                rejeicaoContainer.style.display = 'none';
+                outroMotivoContainer.style.display = 'none';
+                motivoRejeicaoSelect.value = '';
+            }
+        });
+        
+        motivoRejeicaoSelect.addEventListener('change', function() {
+            if (this.value === 'outro') {
+                outroMotivoContainer.style.display = 'block';
+            } else {
+                outroMotivoContainer.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

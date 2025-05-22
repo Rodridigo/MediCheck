@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatório de Medicamentos{% endblock %}
+
+{% block header %}Relatório de Medicamentos{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title">Estatísticas de Dispensação por Medicamento</h5>
+            <button class="btn btn-primary" onclick="window.print()">
+                <i class="bi bi-printer"></i> Imprimir Relatório
+            </button>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Lista A</h6>
+                        <p class="display-4">{{ resumo_listas.A }}</p>
+                        <small>Entorpecentes</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Lista B</h6>
+                        <p class="display-4">{{ resumo_listas.B }}</p>
+                        <small>Psicotrópicos</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-secondary text-white">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Lista C</h6>
+                        <p class="display-4">{{ resumo_listas.C }}</p>
+                        <small>Outras Substâncias</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Antimicrobianos</h6>
+                        <p class="display-4">{{ resumo_listas.Antimicrobianos }}</p>
+                        <small>RDC 471/2021</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if medicamentos %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Medicamento</th>
+                            <th>Princípio Ativo</th>
+                            <th>Lista</th>
+                            <th>Total Dispensado</th>
+                            <th>Receitas</th>
+                            <th>Média por Receita</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for medicamento in medicamentos %}
+                            <tr>
+                                <td>{{ medicamento.nome }}</td>
+                                <td>{{ medicamento.principio_ativo }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if medicamento.lista.startswith('A') %}bg-warning text-dark
+                                        {% elif medicamento.lista.startswith('B') %}bg-primary
+                                        {% elif medicamento.lista.startswith('C') %}bg-secondary
+                                        {% elif medicamento.lista == 'Antimicrobiano' %}bg-info
+                                        {% else %}bg-light text-dark
+                                        {% endif %}">
+                                        {{ medicamento.lista }}
+                                    </span>
+                                </td>
+                                <td>{{ medicamento.total_dispensado }} unidades</td>
+                                <td>{{ medicamento.receitas }}</td>
+                                <td>{{ (medicamento.total_dispensado / medicamento.receitas) | round(1) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Nenhum medicamento dispensado no período.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-primary text-white">
+        <i class="bi bi-info-circle"></i> Informações sobre Listas de Medicamentos Controlados
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Portaria 344/98 - Principais Listas:</h6>
+                <ul>
+                    <li><strong>Lista A1 e A2:</strong> Entorpecentes - Notificação de Receita A (amarela)</li>
+                    <li><strong>Lista A3:</strong> Psicotrópicos - Notificação de Receita A (amarela)</li>
+                    <li><strong>Lista B1:</strong> Psicotrópicos - Notificação de Receita B (azul)</li>
+                    <li><strong>Lista B2:</strong> Psicotrópicos Anorexígenos - Notificação de Receita B (azul)</li>
+                    <li><strong>Lista C1:</strong> Outras substâncias sujeitas a controle especial - Receita de Controle Especial em duas vias</li>
+                    <li><strong>Lista C2:</strong> Retinóides de uso sistêmico - Notificação de Receita Especial</li>
+                    <li><strong>Lista C5:</strong> Anabolizantes - Receita de Controle Especial em duas vias</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6>RDC 471/2021 - Antimicrobianos:</h6>
+                <ul>
+                    <li><strong>Receituário:</strong> Receita de Controle Especial em duas vias</li>
+                    <li><strong>Validade:</strong> 10 dias a partir da data de emissão</li>
+                    <li><strong>Retenção:</strong> Segunda via retida na farmácia</li>
+                    <li><strong>Quantidade:</strong> Limitada a no máximo 90 dias de tratamento</li>
+                    <li><strong>Escrituração:</strong> Obrigatória no SNGPC</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a href="{{ url_for('relatorios.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar para Relatórios
+    </a>
+</div>
+{% endblock %}

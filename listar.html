@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Listar Receitas{% endblock %}
+
+{% block header %}Receitas Cadastradas{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title">Histórico de Receitas</h5>
+            <a href="{{ url_for('receitas.cadastrar') }}" class="btn btn-primary">
+                <i class="bi bi-file-earmark-plus"></i> Nova Receita
+            </a>
+        </div>
+        
+        {% if receitas %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tipo</th>
+                            <th>Data Emissão</th>
+                            <th>Paciente</th>
+                            <th>Prescritor</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for receita in receitas %}
+                            <tr>
+                                <td>{{ receita.id }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if receita.tipo_receita == 'Notificação de Receita A' %}bg-warning text-dark
+                                        {% elif receita.tipo_receita == 'Notificação de Receita B' %}bg-primary
+                                        {% else %}bg-light text-dark border
+                                        {% endif %}">
+                                        {{ receita.tipo_receita }}
+                                    </span>
+                                </td>
+                                <td>{{ receita.data_emissao }}</td>
+                                <td>{{ receita.paciente_nome }}</td>
+                                <td>{{ receita.prescritor_nome }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if receita.status == 'aprovada' %}bg-success
+                                        {% elif receita.status == 'rejeitada' %}bg-danger
+                                        {% else %}bg-secondary
+                                        {% endif %}">
+                                        {{ receita.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('receitas.detalhes', receita_id=receita.id) }}" class="btn btn-sm btn-info">
+                                        <i class="bi bi-eye"></i> Detalhes
+                                    </a>
+                                    {% if receita.status == 'pendente' %}
+                                    <a href="{{ url_for('receitas.validar', receita_id=receita.id) }}" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-check-circle"></i> Validar
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Nenhuma receita cadastrada até o momento.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-info text-white">
+        <i class="bi bi-info-circle"></i> Resumo de Atividades
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Receitas Aprovadas</h5>
+                        <p class="card-text display-4">{{ receitas|selectattr('status', 'equalto', 'aprovada')|list|length }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-danger mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Receitas Rejeitadas</h5>
+                        <p class="card-text display-4">{{ receitas|selectattr('status', 'equalto', 'rejeitada')|list|length }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-secondary mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Receitas Pendentes</h5>
+                        <p class="card-text display-4">{{ receitas|selectattr('status', 'equalto', 'pendente')|list|length }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

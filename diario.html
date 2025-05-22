@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatório Diário{% endblock %}
+
+{% block header %}Relatório Diário{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title">Receitas do Dia</h5>
+            <form method="POST" action="{{ url_for('relatorios.diario') }}" class="d-flex">
+                <input type="date" class="form-control me-2" name="data" value="{{ data_selecionada }}" max="{{ data_atual }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+            </form>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Total de Receitas</h6>
+                        <p class="display-4">{{ resumo.total }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Aprovadas</h6>
+                        <p class="display-4">{{ resumo.aprovadas }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Rejeitadas</h6>
+                        <p class="display-4">{{ resumo.rejeitadas }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Controlados</h6>
+                        <p class="display-4">{{ resumo.controlados }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if receitas %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Tipo de Receita</th>
+                            <th>Medicamento</th>
+                            <th>Paciente</th>
+                            <th>Prescritor</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for receita in receitas %}
+                            <tr>
+                                <td>{{ receita.hora }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if receita.tipo_receita == 'Notificação de Receita A' %}bg-warning text-dark
+                                        {% elif receita.tipo_receita == 'Notificação de Receita B' %}bg-primary
+                                        {% else %}bg-light text-dark border
+                                        {% endif %}">
+                                        {{ receita.tipo_receita }}
+                                    </span>
+                                </td>
+                                <td>{{ receita.medicamento }}</td>
+                                <td>{{ receita.paciente }}</td>
+                                <td>{{ receita.prescritor }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if receita.status == 'aprovada' %}bg-success
+                                        {% elif receita.status == 'rejeitada' %}bg-danger
+                                        {% else %}bg-secondary
+                                        {% endif %}">
+                                        {{ receita.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('receitas.detalhes', receita_id=receita.id) }}" class="btn btn-sm btn-info">
+                                        <i class="bi bi-eye"></i> Detalhes
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Nenhuma receita encontrada para a data selecionada.
+            </div>
+        {% endif %}
+    </div>
+    <div class="card-footer">
+        <div class="d-flex justify-content-between">
+            <a href="{{ url_for('relatorios.index') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+            <button class="btn btn-primary" onclick="window.print()">
+                <i class="bi bi-printer"></i> Imprimir Relatório
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-info text-white">
+        <i class="bi bi-info-circle"></i> Informações Legais
+    </div>
+    <div class="card-body">
+        <p>Este relatório diário contém informações sobre todas as receitas cadastradas e validadas na data selecionada, em conformidade com:</p>
+        <ul>
+            <li>Portaria SVS/MS nº 344/98 - Regulamento Técnico sobre substâncias e medicamentos sujeitos a controle especial</li>
+            <li>RDC nº 471/2021 - Critérios para prescrição, dispensação e controle de antimicrobianos</li>
+            <li>Normas específicas da Vigilância Sanitária do Estado do Rio de Janeiro</li>
+        </ul>
+        <p class="mb-0 text-muted">Mantenha este relatório arquivado para fins de fiscalização e auditoria.</p>
+    </div>
+</div>
+{% endblock %}
